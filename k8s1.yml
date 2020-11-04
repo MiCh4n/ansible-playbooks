@@ -1,0 +1,17 @@
+---
+- name: Install learning environment for kubernetes
+  hosts: fluidflow 
+  tasks:
+          - name: ensure that docker is there
+            yum:
+                    name: ['docker-ce', 'docker-ce-cli', 'container.io']
+                    state: latest
+          - name: ensure that kubectl is there
+            yum:
+                    name: kubectl
+                    state: latest
+
+          - name: ensure that minikube is there
+            yum:
+                    name: https://storage.googleapis.com/minikube/releases/latest/minikube-latest.x86_64.rpm
+                    state: latest
