@@ -1,0 +1,64 @@
+---
+- name: Setup simple working environment for Redhat/CentOS/Fedora/Ubuntu/Debian
+  hosts: fluidflow # set your hosts
+  gather_facts: yes
+  tasks:
+          - name: Create user
+            block:
+                  - name: Add user
+                    user:
+                        name: worker
+                        password: ''
+                        group:
+                        state: present
+                        shell: /bin/bash
+                        system: no
+                        createhome: yes
+                        home: /home/worker
+                  - name: Change password to 0 days validaty
+                    shell: 'chage -d 0 worker' # set password to 0 days so user need to change it at login      
+          - name: Install for Redhat family
+            block:
+                    - name: Update repo RedHat
+                      yum_repository:
+                        name: docker repo
+                        description: docker yum repo
+                        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+                    - name: Install software
+                      yum:
+                        name:
+                            - https://github.com/atom/atom/releases/download/v1.52.0/atom.x86_64.rpm
+                            - libreoffice
+                            - docker-ce
+                            - docker-ce-cli
+                            - containerd.io
+                            - https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/k/kdevelop-4.7.1-1.el7.aarch64.rpm
+                        state: latest
+                    - name: Add worker to docker group
+                      user:
+                        name: worker
+                        groups: docker
+                        append: yes
+            when: ansible_os_family == "RedHat"
+          - name: Install for Debian/Ubuntu
+            block:
+                    - name: Update repo Debian/Ubuntu
+                      apt_repository:
+                        repo: deb [arch=amd64] https://download.docker.com/linux/debian
+                        state: present
+                    - name: Install software
+                      apt:
+                        name:
+                            - geany
+                            - libreoffice
+                            - docker-ce
+                            - docker-ce-cli
+                            - containerd.io
+                            - kdevelop
+                        state: latest
+                    - name: Add worker to docker group
+                      user:
+                        name: worker
+                        groups: docker
+                        append: yes
+            when: ansible_os_family == "Debian"
